@@ -1,0 +1,52 @@
+plugins {
+	id 'org.springframework.boot' version '2.2.6.RELEASE'
+	id 'io.spring.dependency-management' version '1.0.9.RELEASE'
+	id 'java'
+	id 'maven-publish'
+}
+
+group = 'com.pudulabs'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '1.8'
+
+repositories {
+	mavenCentral()
+}
+
+publishing {
+	publications {
+		maven(MavenPublication) {
+			artifact("build/libs/publisher-${version}.jar") {
+				extension 'jar'
+			}
+		}
+	}
+
+	repositories {
+		maven {
+			//GCP Cloud Storage bucket
+			//url "gcs://my-mvn-repository/maven/release"
+			//def releasesRepoUrl = "gcs://my-mvn-repository/maven/release"
+			//def snapshotsRepoUrl = "gcs://my-mvn-repository/maven/snapshot"
+			//url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
+
+			//AWS S3 bucket
+			url System.getenv('s3ArtifactUrl')
+			credentials(AwsCredentials) {
+				accessKey = System.getenv('awsAccessKeyId')
+				secretKey = System.getenv('awsSecretAccessKey')
+			}
+		}
+	}
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter'
+	testImplementation('org.springframework.boot:spring-boot-starter-test') {
+		exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
+	}
+}
+
+test {
+	useJUnitPlatform()
+}
